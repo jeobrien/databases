@@ -17,7 +17,6 @@ CREATE TABLE messages (
   /* Describe your table here.*/
   message_id int(5) NOT NULL AUTO_INCREMENT,
   message_text text(250),
-  created datetime,
   room_id_Rooms int,
   user_id_Users int,
   PRIMARY KEY(message_id),

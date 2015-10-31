@@ -14,12 +14,6 @@ module.exports.app = app;
 // Set what we are listening on.
 app.set("port", 3000);
 
-// app.use(function(req, res, next) {
-//     res.setHeader("Access-Control-Allow-Origin", "*");
-//     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-//     return next();
-//   });
-
 // Logging and parsing
 app.use(morgan('dev'));
 app.use(parser.json());

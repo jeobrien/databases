@@ -15,22 +15,31 @@ module.exports = {
       db.connection.end();
     },
     post: function (message, callback) {
-      // var postMessage = 'INSERT into messages(message_text, room_id_Rooms, user_id_Users)
-      // SELECT username
-      // FROM messages m inner join users u on (m.user_id = )
-      //  values ('+db.connection.escape(message.message) + ')
-      //                   '
-      // values (+db.connection.escape(message.message) + ',' + db.connection.escape(message.roomname) + ',' + db.connection.escape(message.username)+');
-      var postMessage = 'INSERT into messages(message_text, user_id_Users, room_id_Rooms) from messages inner join users on(messages.user_id = users.user_id) inner join rooms on(messages.room_id = rooms.room_id) values(' + db.connection.escape(message.message) + ', (select user_id from users where user_name = ' + db.connection.escape(message.username) + ', (select room_id from rooms where room_name = ' + db.connection.escape(message.roomname) + '));'
-        // create variables that store each subquery then pass those through to the post 
-      db.connection.query(postMessage, function(err, results) {
+      // insert message text, userid, room id into messages
+      var roomIDQuery = 'SELECT room_id from rooms where room_name = ' + db.connection.escape(message.roomname) + ';'
+
+      // store user id in a variable
+      var userIDQuery = 'SELECT user_id from users where user_name = ' + db.connection.escape(message.username) + ';'
+
+      db.connection.query(roomIDQuery + userIDQuery, function (err, results) {
         if (err) {
-          console.error(err);
+          console.log(err);
         } else {
-          callback(results);
+          var roomID = results[0][0];
+          var userID = results[1][0];
+          // check if in rooms, if not insert roomname into room and store room id in variable
+          var roomnameInsert = 'INSERT into rooms (room_name) values ('+ db.connection.escape(message.roomname) +');'
+
+          var messageQuery = 'INSERT INTO messages (message_text, room_id_Rooms, user_id_Users) values (' + db.connection.escape(message.message) + ', ' + db.connection.escape(roomID.room_id) + ', ' + db.connection.escape(userID.user_id) + ');'
+          db.connection.query(roomnameInsert + messageQuery, function(err, results) {
+            if (err) {
+              console.error(err);
+            } else {
+              callback(results);
+            }
+          });
         }
       });
-      db.connection.end();
     }
   },
   users: {
@@ -59,11 +68,3 @@ module.exports = {
     }
   }
 };
-
-
-
-// subquery1: get user_id for user_name
-// select user_id from users where user_name = db.connection.escape(message.username)
-
-// subquery2: get room_id for room_name
-// select room_id from rooms where room_name = db.connection.escape(message.roomname)  
