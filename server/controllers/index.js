@@ -9,17 +9,16 @@ module.exports = {
         if (err) {
           console.log(err);
         } else {
-          res.send(data);
+          res.json(data);
         }
       });
     },
     post: function (req, res) {
-      // var message = {username: "Hayley", message: "HELLO", roomname: "Lobby"};
       models.messages.post(req.body, function (err, data) {
         if (err) {
           console.log(err);
         } else {
-          res.send(data);
+          res.sendStatus(201);
         }
       });
     }
@@ -30,7 +29,7 @@ module.exports = {
         if (err) {
           console.log(err);
         } else {
-          res.send(data);
+          res.json(data);
         }
       });
     },
@@ -39,8 +38,7 @@ module.exports = {
         if (err) {
           console.log(err);
         } else {
-          // db.connection.end();
-          res.send(data);
+          res.sendStatus(201);
         }
       });
     }

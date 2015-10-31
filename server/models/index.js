@@ -9,10 +9,9 @@ module.exports = {
         if (err) {
           console.error(err);
         } else {
-          callback(results);
+          callback(err, results);
         }
       });
-      // db.connection.end();
     },
     post: function (message, callback) {
       // insert message text, userid, room id into messages
@@ -50,7 +49,7 @@ module.exports = {
                         if (err) {
                           console.error(err);
                         } else {
-                          callback(results);
+                          callback(err, results);
                         }
                       });
                     }
@@ -60,7 +59,7 @@ module.exports = {
                       if (err) {
                         console.error(err);
                       } else {
-                        callback(results);
+                        callback(err, results);
                       }
                     });
                   }
@@ -80,7 +79,7 @@ module.exports = {
                     if (err) {
                       console.error(err);
                     } else {
-                      callback(results);
+                      callback(err, results);
                     }
                   });
                 }
@@ -91,7 +90,7 @@ module.exports = {
                 if (err) {
                   console.error(err);
                 } else {
-                  callback(results);
+                  callback(err, results);
                 }
               });
             }
@@ -107,7 +106,7 @@ module.exports = {
         if (err) {
           console.error(err);
         } else {
-          callback(results);
+          callback(err, results);
         }
       });
     },
@@ -118,7 +117,7 @@ module.exports = {
         if (err) {
           console.error(err);
         } else {
-          callback(results);
+          callback(err, results);
         }
       });
     }
