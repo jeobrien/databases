@@ -12,7 +12,7 @@ module.exports = {
           callback(results);
         }
       });
-      db.connection.end();
+      // db.connection.end();
     },
     post: function (message, callback) {
       // insert message text, userid, room id into messages
@@ -27,7 +27,6 @@ module.exports = {
         if (err) {
           console.log(err);
         } else {
-          console.log(results);
           var roomID = results[0][0];
           var userID = results[1][0];
           // room does not yet exist
@@ -39,8 +38,6 @@ module.exports = {
               } else {
                 var roomID = results[1][0];
                 var userID = results[2][0];
-                var messageQuery = 'INSERT INTO messages (message_text, room_id_Rooms, user_id_Users) values (' + db.connection.escape(message.message) + ', ' + db.connection.escape(roomID.room_id) + ', ' + db.connection.escape(userID.user_id) + ');'
-
                 if (!userID) {
                   db.connection.query(usernameInsert + userIDQuery + roomIDQuery, function(err, results) {
                     if (err) {
@@ -48,6 +45,7 @@ module.exports = {
                     } else {
                       var roomID = results[2][0];
                       var userID = results[1][0];
+                      var messageQuery = 'INSERT INTO messages (message_text, room_id_Rooms, user_id_Users) values (' + db.connection.escape(message.message) + ', ' + db.connection.escape(roomID.room_id) + ', ' + db.connection.escape(userID.user_id) + ');'
                       db.connection.query(messageQuery, function(err, results) {
                         if (err) {
                           console.error(err);
@@ -70,14 +68,33 @@ module.exports = {
             });
           // room already exists
           } else {
-            var messageQuery = 'INSERT INTO messages (message_text, room_id_Rooms, user_id_Users) values (' + db.connection.escape(message.message) + ', ' + db.connection.escape(roomID.room_id) + ', ' + db.connection.escape(userID.user_id) + ');'
-            db.connection.query(messageQuery, function(err, results) {
-              if (err) {
-                console.error(err);
-              } else {
-                callback(results);
-              }
-            });
+            if (!userID) {
+              db.connection.query(usernameInsert + userIDQuery + roomIDQuery, function(err, results) {
+                if (err) {
+                  console.error(err);
+                } else {
+                  var roomID = results[2][0];
+                  var userID = results[1][0];
+                  var messageQuery = 'INSERT INTO messages (message_text, room_id_Rooms, user_id_Users) values (' + db.connection.escape(message.message) + ', ' + db.connection.escape(roomID.room_id) + ', ' + db.connection.escape(userID.user_id) + ');'
+                  db.connection.query(messageQuery, function(err, results) {
+                    if (err) {
+                      console.error(err);
+                    } else {
+                      callback(results);
+                    }
+                  });
+                }
+              });
+            } else {
+              var messageQuery = 'INSERT INTO messages (message_text, room_id_Rooms, user_id_Users) values (' + db.connection.escape(message.message) + ', ' + db.connection.escape(roomID.room_id) + ', ' + db.connection.escape(userID.user_id) + ');'
+              db.connection.query(messageQuery, function(err, results) {
+                if (err) {
+                  console.error(err);
+                } else {
+                  callback(results);
+                }
+              });
+            }
           }
         }
       });
@@ -93,7 +110,6 @@ module.exports = {
           callback(results);
         }
       });
-      db.connection.end();
     },
     post: function (username, callback) {
       // check to make sure username isn't in database
@@ -105,7 +121,6 @@ module.exports = {
           callback(results);
         }
       });
-      db.connection.end();
     }
   }
 };

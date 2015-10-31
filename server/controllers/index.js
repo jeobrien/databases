@@ -1,5 +1,6 @@
 var models = require('../models');
 var app = require('../app');
+var db = require('../db');
 
 module.exports = {
   messages: {
@@ -38,6 +39,7 @@ module.exports = {
         if (err) {
           console.log(err);
         } else {
+          // db.connection.end();
           res.send(data);
         }
       });
