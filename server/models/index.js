@@ -3,8 +3,9 @@ var db = require('../db');
 module.exports = {
   messages: {
     get: function (callback) {
-      // db.get
-      db.connection.query(sqlQueries.getAllMessages, function(err, results) {
+      var getAllMessages =
+      'SELECT users.user_name, messages.message_text, rooms.room_name FROM messages join users ON (users.user_id = messages.user_id_Users) join rooms ON (rooms.room_id = messages.room_id_Rooms);'
+      db.connection.query(getAllMessages, function(err, results) {
         if (err) {
           console.error(err);
         } else {
@@ -12,7 +13,7 @@ module.exports = {
         }
       });
       db.connection.end();
-    }, // a function which produces all the messages
+    },
     post: function (message, callback) {
       // var postMessage = 'INSERT into messages(message_text, room_id_Rooms, user_id_Users)
       // SELECT username
@@ -20,6 +21,8 @@ module.exports = {
       //  values ('+db.connection.escape(message.message) + ')
       //                   '
       // values (+db.connection.escape(message.message) + ',' + db.connection.escape(message.roomname) + ',' + db.connection.escape(message.username)+');
+      var postMessage = 'INSERT into messages(message_text, user_id_Users, room_id_Rooms) from messages inner join users on(messages.user_id = users.user_id) inner join rooms on(messages.room_id = rooms.room_id) values(' + db.connection.escape(message.message) + ', (select user_id from users where user_name = ' + db.connection.escape(message.username) + ', (select room_id from rooms where room_name = ' + db.connection.escape(message.roomname) + '));'
+        // create variables that store each subquery then pass those through to the post 
       db.connection.query(postMessage, function(err, results) {
         if (err) {
           console.error(err);
@@ -28,12 +31,12 @@ module.exports = {
         }
       });
       db.connection.end();
-    } // a function which can be used to insert a message into the database
+    }
   },
-
   users: {
     get: function (callback) {
-      db.connection.query(sqlQueries.getAllUsers, function(err, results) {
+      var getAllUsers = 'SELECT user_name FROM users;'
+      db.connection.query(getAllUsers, function(err, results) {
         if (err) {
           console.error(err);
         } else {
@@ -56,39 +59,11 @@ module.exports = {
     }
   }
 };
-// 'insert into messages (message_text, user_id_rooms, room_id_rooms)
-// from messages
-// values (' + db.connection.escape(message.message)')
 
-// insert into messages (user_id_rooms)
-// from users
-// where user_id = (select user_id from users where user_name =' + db.connection.escape(message.username) + '); 
-// values (user_id)
 
-// insert into messages (room_id_rooms)
-// from rooms
-// where room_id = (select room_id from rooms where room_name =' + db.connection.escape(message.roomname) + ')
-// values (room_id)'
 
-// do all the queries in here
-// var sqlQueries = {
-//   getAllMessages:
-//   'SELECT u.user_name, m.message_text, r.room_name
-//   FROM messages m join users u
-//   ON (u.user_id = m.user_id_Users)
-//   join rooms r
-//   ON (r.room_id = m.room_id_Rooms);',
+// subquery1: get user_id for user_name
+// select user_id from users where user_name = db.connection.escape(message.username)
 
-//   getAllUsers:
-//   'SELECT u.user_name
-//   FROM users;',
-  
-//   postMessage: 
-//     'INSERT into messages
-//     (message_text, room_id_Rooms, user_id_Users)
-//     values ('+message.text+','+message.roomname+','+message.username+');',
-  
-//   addUser: 
-//   'INSERT into users
-//   (user_name) values ('+username+');'
-// };
+// subquery2: get room_id for room_name
+// select room_id from rooms where room_name = db.connection.escape(message.roomname)  
