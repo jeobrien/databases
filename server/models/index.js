@@ -20,24 +20,65 @@ module.exports = {
 
       // store user id in a variable
       var userIDQuery = 'SELECT user_id from users where user_name = ' + db.connection.escape(message.username) + ';'
+      var roomnameInsert = 'INSERT into rooms (room_name) values ('+ db.connection.escape(message.roomname) +');'
+      var usernameInsert = 'INSERT into users (user_name) values (' + db.connection.escape(message.username) + ');'
 
       db.connection.query(roomIDQuery + userIDQuery, function (err, results) {
         if (err) {
           console.log(err);
         } else {
+          console.log(results);
           var roomID = results[0][0];
           var userID = results[1][0];
-          // check if in rooms, if not insert roomname into room and store room id in variable
-          var roomnameInsert = 'INSERT into rooms (room_name) values ('+ db.connection.escape(message.roomname) +');'
+          // room does not yet exist
+          if (!roomID) {
+            // insert room query
+            db.connection.query(roomnameInsert + roomIDQuery + userIDQuery, function(err, results) {
+              if (err) {
+                console.error(err);
+              } else {
+                var roomID = results[1][0];
+                var userID = results[2][0];
+                var messageQuery = 'INSERT INTO messages (message_text, room_id_Rooms, user_id_Users) values (' + db.connection.escape(message.message) + ', ' + db.connection.escape(roomID.room_id) + ', ' + db.connection.escape(userID.user_id) + ');'
 
-          var messageQuery = 'INSERT INTO messages (message_text, room_id_Rooms, user_id_Users) values (' + db.connection.escape(message.message) + ', ' + db.connection.escape(roomID.room_id) + ', ' + db.connection.escape(userID.user_id) + ');'
-          db.connection.query(roomnameInsert + messageQuery, function(err, results) {
-            if (err) {
-              console.error(err);
-            } else {
-              callback(results);
-            }
-          });
+                if (!userID) {
+                  db.connection.query(usernameInsert + userIDQuery + roomIDQuery, function(err, results) {
+                    if (err) {
+                      console.error(err);
+                    } else {
+                      var roomID = results[2][0];
+                      var userID = results[1][0];
+                      db.connection.query(messageQuery, function(err, results) {
+                        if (err) {
+                          console.error(err);
+                        } else {
+                          callback(results);
+                        }
+                      });
+                    }
+                  });
+                } else {
+                    db.connection.query(messageQuery, function(err, results) {
+                      if (err) {
+                        console.error(err);
+                      } else {
+                        callback(results);
+                      }
+                    });
+                  }
+                }
+            });
+          // room already exists
+          } else {
+            var messageQuery = 'INSERT INTO messages (message_text, room_id_Rooms, user_id_Users) values (' + db.connection.escape(message.message) + ', ' + db.connection.escape(roomID.room_id) + ', ' + db.connection.escape(userID.user_id) + ');'
+            db.connection.query(messageQuery, function(err, results) {
+              if (err) {
+                console.error(err);
+              } else {
+                callback(results);
+              }
+            });
+          }
         }
       });
     }
